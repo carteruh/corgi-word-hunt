@@ -19,3 +19,18 @@ Use case: illustration-story. Produce a clean production sprite sheet of SIX iso
 [petal-night.webp]
 The built-in ImageGen tool painted the night meadow using the daytime garden as a visual reference. Clover and the tulips in Petal wind are made from particles sampled from the existing illustrations. The prompt follows.
 Use case: illustration-story. Illustrate an original film-background cel, a 16:9 panoramic, full-bleed hand-painted Ghibli-inspired summer garden at midnight, the companion to the reference meadow’s soft ink-and-gouache countryside and little faraway cottage. Compose a field under a velvety deep indigo and midnight teal sky, full of hush. Extremely important composition: the broad center 65% of the frame, from 18% to 80% of the height, is very dark, blue-green, nearly featureless open air and receding low-contrast meadow, reserved for a luminous moving figure added separately. The middle must stay quiet if cropped to portrait. Set a few tiny silver stars high along the upper rim, a small pale golden crescent moon in the extreme upper right at x88%, and just a hint of atmospheric paper grain. In the low third, softly overlap two or three distant blue mountain silhouettes and a dim tree line, softly merging into the central darkness. On the far right horizon, a tiny cottage with one or two pinpoints of amber window light. Confine botanically lovely delicate brushwork of moonlit grasses, nodding wildflower silhouettes, and a few restrained blue-lavender blossoms to the very lowest 16% and the far left and far right edges. Soft indigo-cyan edge light, no colorful high-contrast clumps near center. Painterly depth, graceful ink edges, hand-mixed indigo pigments, faint warm reflected light. This is a night scene with readable deep blue and teal, never a flat black rectangle. No characters, animals, people, main subject in the center, graphic frames, floating flowers, falling petals, sparkle particles, paths cutting through center, lettering, logos, typography, controls or UI.
+
+Welcome note animations
+These three user-selected animations appear in the opening note. Each has a still of its first frame for visitors who prefer reduced motion.
+
+welcome-corgi.webp and welcome-corgi-still.webp
+Two Lazy Corgi characters from GIPHY.
+https://media3.giphy.com/media/oS7kS2fQvr3RrjhV56/giphy.gif
+
+welcome-winter.webp and welcome-winter-still.webp
+Cat and penguin sharing a blanket from Tenor.
+https://media.tenor.com/sFcumzGELBIAAAAj/cat-winter.gif
+
+welcome-soup.webp and welcome-soup-still.webp
+Steaming soup illustration from Behance.
+https://mir-s3-cdn-cf.behance.net/project_modules/hd/db0c0643048979.57e184984e204.gif

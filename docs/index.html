@@ -16,8 +16,9 @@
   <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="puppet.css">
   <link rel="stylesheet" href="petal-wind.css">
+  <link rel="stylesheet" href="welcome.css">
 </head>
-<body data-screen="home">
+<body data-screen="welcome">
   <svg class="symbol-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
       <symbol id="i-spark" viewBox="0 0 16 16"><path fill="currentColor" stroke="none" d="M7 0h2v4h2v2h2v1h3v2h-3v1h-2v2H9v4H7v-4H5v-2H3V9H0V7h3V6h2V4h2z"/></symbol>
@@ -45,11 +46,13 @@
 <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h10a3 3 0 1 0-3-3M2 13h16a3 3 0 1 0-2.5-4.6M5 17h7a2.5 2.5 0 1 1-2.1 3.8"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24"><path d="m11 5-7 7 7 7M4 12h16"/></symbol>
 <symbol id="i-tulip" viewBox="0 0 24 24"><path d="M12 21v-8M7 4l3 2.5L12 3l2 3.5L17 4v4a5 5 0 0 1-10 0zM12 20c-4 0-6-2-7-5 4 0 6 2 7 5Zm0-2c1-3 3-5 7-5-1 3-3 5-7 5Z"/></symbol>
+<symbol id="i-envelope" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="m3.5 6 8.5 7 8.5-7"/></symbol>
     </defs>
   </svg>
 
   <header class="topbar">
     <nav class="nav-controls" aria-label="Game controls">
+      <button class="nav-button home-note" id="read-note" type="button" aria-label="Reread the welcome note" title="Reread the welcome note"><svg class="icon" aria-hidden="true"><use href="#i-envelope"/></svg><span>Read note</span></button>
       <button class="nav-button icon-only home-sound" data-sound type="button" aria-label="Flute and game sounds" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg></button>
       <button id="scores-button" class="nav-button" type="button" aria-label="Board scores"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg><span>Board scores</span></button>
       <button id="share-button" class="nav-button" type="button" aria-label="Share this board"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg><span>Share board</span></button>
@@ -57,7 +60,46 @@
     </nav>
   </header>
   <main>
-    <section id="petal-wind" aria-labelledby="home-title">
+    <section id="welcome" class="welcome" aria-label="A note for you" aria-roledescription="carousel">
+      <div class="welcome-letter">
+        <div class="welcome-top">
+          <button type="button" class="welcome-link welcome-sound" data-sound aria-label="Welcome and game sounds" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg><span data-sound-label>Sound on</span></button>
+          <button type="button" class="welcome-link" id="welcome-skip">Skip intro</button>
+        </div>
+        <div class="welcome-pages" id="welcome-pages">
+          <article class="welcome-slide" aria-label="1 of 2" aria-roledescription="slide">
+            <div class="welcome-message"><p>I know you love Word Hunt and Corgis so why not combine them hehe?</p></div>
+            <div class="welcome-art"><template><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="assets/welcome-corgi-still.webp">
+              <img src="assets/welcome-corgi.webp" width="480" height="480" alt="Two little corgis snuggle cheek to cheek." draggable="false">
+            </picture></template></div>
+          </article>
+          <article class="welcome-slide welcome-winter" aria-label="2 of 2" aria-roledescription="slide" hidden>
+            <div class="welcome-message"><p>Fun fact that I heard was that unlike other birds, swans in North America do not migrate and cozy up in the freezing cold!</p><p>Its so cold over here I hope we can eat plenty of tofu soup!!</p></div>
+            <div class="welcome-pair">
+              <div class="welcome-art"><template><picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="assets/welcome-winter-still.webp">
+                <img src="assets/welcome-winter.webp" width="200" height="200" alt="A cat and a penguin share a purple blanket under the words “It’s too cold.”" draggable="false">
+              </picture></template></div>
+              <button type="button" id="welcome-soup" aria-label="Move the steaming tofu soup. Drag or use the arrow keys. Press Home to put it back." aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Home" title="Drag the tofu soup">
+                <span class="soup-frame"><template><picture>
+                  <source media="(prefers-reduced-motion: reduce)" srcset="assets/welcome-soup-still.webp">
+                  <img src="assets/welcome-soup.webp" width="640" height="360" alt="" draggable="false">
+                </picture></template></span>
+                <svg class="soup-handle icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M9 6l3-3 3 3m-6 12 3 3 3-3M6 9l-3 3 3 3m12-6 3 3-3 3"/></svg>
+              </button>
+            </div>
+          </article>
+        </div>
+        <nav class="welcome-nav" aria-label="Welcome slides">
+          <button class="welcome-link" type="button" id="welcome-back" disabled>Back</button>
+          <div class="welcome-dots" aria-hidden="true"><i class="current"></i><i></i></div>
+          <button class="welcome-next" type="button" id="welcome-next">Next</button>
+        </nav>
+        <p class="sr-only" id="welcome-status" role="status" aria-atomic="true"></p>
+      </div>
+    </section>
+    <section id="petal-wind" aria-labelledby="home-title" hidden>
       <div class="wind-intro" id="landing-intro">
         <h1 id="home-title">Corgi <span>Word Hunt</span></h1>
         <p>Trace words in one minute. Each word grows a flower in your garden.</p>

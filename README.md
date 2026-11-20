@@ -4,6 +4,8 @@
 
 Trace adjacent letters to find as many words as you can in one minute. Share a board link and compare your best scores with friends under a nickname. Players can join from a phone or a computer without an account.
 
+Each new tab opens with two personal notes. Tap Next or swipe to turn the page. On the second slide, drag the steaming tofu soup or focus it and move it with the arrow keys. **Enter the meadow** opens the petal home, and the envelope there reopens the note. The speaker button controls sound for the welcome, hunt, and garden. [Open the welcome note](https://carteruh.github.io/corgi-word-hunt/?board=1dh1#welcome)
+
 The home page is an interactive moonlit meadow. Sweep a finger or mouse through Clover’s petal portrait, hold to release more petals, or choose Tulips to reshape the portrait. With a keyboard, use the arrows and Space. Choose **Play for 60 seconds** when you’re ready. [Open the game](https://carteruh.github.io/corgi-word-hunt/?board=1dh1)
 
 When the minute ends, your garden opens with a flower for each word you found. Compare scores, replay the board, or stay and plant. Tap to plant a flower and play the next flute note of Joe Hisaishi’s *Merry-Go-Round of Life*. Drag a trail to hear a whole phrase. On a keyboard, use Enter for a note and Shift + Enter for a phrase.

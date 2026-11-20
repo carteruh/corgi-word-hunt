@@ -26,15 +26,27 @@ const floor=.0001;
 const pitch=note=>440*2**((note-69)/12);
 
 export function gardenAudio(initiallyEnabled) {
-  let enabled=initiallyEnabled,ctx,master,fluteBus,wave,air,lastVoice,lastStart=-1,clockUsable=true;
+  let enabled=initiallyEnabled,ctx,master,fluteBus,wave,air,lastVoice,lastStart=-1;
+  let primed=false, pendingSound=null;
 
+  function sessionType(type) {
+    try { if(navigator.audioSession && navigator.audioSession.type!==type)navigator.audioSession.type=type; }
+    catch { /* Audio session selection is optional on some browsers. */ }
+  }
+  function flush() {
+    if(!enabled || document.hidden || ctx?.state!=='running')return;
+    const play=pendingSound;pendingSound=null;play?.();
+  }
   function unlock() {
-    if(!enabled)return false;
+    if(!enabled || document.hidden)return false;
     try {
-      if(!ctx) {
+      if(!ctx || ctx.state==='closed') {
         const Audio=window.AudioContext || window.webkitAudioContext;
         if(!Audio)return false;
+        // On iOS, use the media volume for the flute even when the ringer is silent.
+        sessionType('playback');
         ctx=new Audio();master=ctx.createGain();master.gain.value=.70;master.connect(ctx.destination);
+        primed=false;lastVoice=null;lastStart=-1;ctx.onstatechange=flush;
         // Reflections decay behind the flute while the next attack stays clear.
         const echo=ctx.createDelay(.4),feedback=ctx.createGain(),send=ctx.createGain();
         echo.delayTime.value=.145;feedback.gain.value=.18;send.gain.value=.14;
@@ -45,18 +57,38 @@ export function gardenAudio(initiallyEnabled) {
         const data=air.getChannelData(0);let random=58129;
         for(let i=0;i<data.length;i++){random=(Math.imul(random,1664525)+1013904223)>>>0;data[i]=random/2147483648-1;}
       }
-      if(ctx.state!=='running')ctx.resume().catch(()=>{clockUsable=false;});
+      if(ctx.state!=='running')ctx.resume().then(flush,()=>{});
+      if(!primed || ctx.state!=='running') {
+        // Touch Safari needs a source started inside the gesture as well as resume().
+        const context=ctx, primer=context.createBufferSource();
+        primer.buffer=context.createBuffer(1,1,context.sampleRate);primer.connect(master);
+        primer.onended=()=>{if(ctx===context)primed=true;primer.disconnect();};primer.start();
+      }
+      flush();
       return true;
     } catch{return false;}
   }
+  function whenReady(play) {
+    if(!unlock())return;
+    if(ctx.state==='running')play();
+    else pendingSound=play;
+  }
+  function release() {
+    pendingSound=null;
+    if(!ctx)return;
+    const previous=ctx;ctx=null;master=null;fluteBus=null;air=null;wave=null;lastVoice=null;
+    previous.onstatechange=null;
+    if(previous.state!=='closed')previous.close().catch(()=>{});
+    sessionType('auto');
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)release();});
+  window.addEventListener('pagehide',release);
   function setEnabled(next) {
     enabled=next;
-    if(next)unlock();
-    if(master)master.gain.setTargetAtTime(next ? .70 : 0,ctx.currentTime,.007);
+    if(next)unlock();else release();
   }
 
   function flower(index) {
-    if(!unlock())return false;
     const [note,beats]=melody[index%melody.length],hz=pitch(note);
     const start=Math.max(ctx.currentTime+.009,lastStart+.055);
     lastStart=start;
@@ -88,11 +120,9 @@ export function gardenAudio(initiallyEnabled) {
     };
     osc.start(start);vibrato.start(start);breath.start(start,(index*.113)%air.duration);
     osc.stop(end+.012);vibrato.stop(end+.012);breath.stop(end+.012);
-    return true;
   }
 
-  function cue(kind) {
-    if(!unlock())return;
+  function chime(kind) {
     const notes=kind==='end'?[523.25,659.25,783.99,1046.5]:kind==='word'?[659.25,880]:kind==='pet'?[392,494]:[523.25];
     for(const [i,hz] of notes.entries()) {
       const start=ctx.currentTime+.012+i*.09;
@@ -101,7 +131,6 @@ export function gardenAudio(initiallyEnabled) {
       osc.connect(gain).connect(master);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(start);osc.stop(start+.35);
     }
   }
-  // On a phone's first swipe the audio clock may wait for touch-up to start.
-  const phraseTime=()=>enabled && ctx && clockUsable?ctx.currentTime*1000:performance.now();
-  return {unlock,setEnabled,flower,cue,phraseTime};
+  function cue(kind) { whenReady(()=>chime(kind)); }
+  return {unlock,setEnabled,whenReady,flower,cue};
 }

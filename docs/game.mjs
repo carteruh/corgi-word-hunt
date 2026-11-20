@@ -3,6 +3,7 @@ import { SIZE, ROUND_MS, boardFor, seedFromLink, boardLink, freshRound, restoreR
 import {read,write,guest,newId,onlineGame,boardRequest,connectLeaderboard} from './guests.mjs';
 import {placeCorgi} from './corgi.mjs';
 import {connectPetalWind} from './petal-wind.mjs';
+import {connectWelcome} from './welcome.mjs';
 import {gardenAudio,melodyLength,phraseDelays} from './garden-audio.mjs';
 
 const $ = id => document.getElementById(id);
@@ -22,7 +23,7 @@ const persist = () => write('sessionStorage',roundKey,round);
 const running = () => round.startedAt!==null && !round.finished;
 
 // Mobile browsers unlock audio during a touch or key gesture, before a drag plants its first flower.
-for(const type of ['pointerdown','pointerup','keydown'])document.addEventListener(type,audio.unlock,{capture:true,passive:true});
+for(const type of ['pointerdown','pointerup','touchend','click','keydown'])document.addEventListener(type,audio.unlock,{capture:true,passive:true});
 let melodyKey='',nextNote=0;
 function currentNote() {
   const key='clover.merry-go-round.v1.'+round.seed.toString(36);
@@ -34,18 +35,23 @@ function currentNote() {
   return nextNote;
 }
 function playFlowerNote() {
-  if(audio.flower(currentNote())){
+  const seed=round.seed;
+  audio.whenReady(()=>{
+    if(round.seed!==seed)return;
+    audio.flower(currentNote());
     nextNote=(nextNote+1)%melodyLength;write('localStorage',melodyKey,nextNote);
-  }
+  });
 }
 function paintSound() {
   for(const button of document.querySelectorAll('[data-sound]')){
     button.setAttribute('aria-pressed',String(sound));button.title=sound?'Turn sound off':'Turn sound on';
     button.querySelector('use').setAttribute('href',sound?'#i-sound':'#i-mute');
+    const label=button.querySelector('[data-sound-label]');if(label)label.textContent=sound?'Sound on':'Sound off';
   }
 }
 document.querySelectorAll('[data-sound]').forEach(b=>b.addEventListener('click',()=>{
   garden?.stopTrail();sound=!sound;write('localStorage',soundKey,sound);audio.setEnabled(sound);paintSound();
+  if(sound)audio.cue('page');
 }));
 function feedback(message,tone='plain') {
   $('feedback').textContent=message; $('feedback').parentElement.dataset.tone=tone;
@@ -136,11 +142,13 @@ function useBoardAddress(hash='',push=false){
 }
 function showScreen(next){
   if(screen===next)return;
+  if(screen==='welcome')welcome.hide();
   if(screen==='home')petals.stop();
   if(screen==='garden'){garden?.dispose();garden=null;}
   screen=next;document.body.dataset.screen=next;
   document.body.classList.toggle('in-game',next==='hunt');
-  $('petal-wind').hidden=next!=='home';$('game-shell').hidden=next!=='hunt';$('garden-home').hidden=next!=='garden';
+  $('welcome').hidden=next!=='welcome';$('petal-wind').hidden=next!=='home';$('game-shell').hidden=next!=='hunt';$('garden-home').hidden=next!=='garden';
+  if(next==='welcome')welcome.show();
   if(next==='home'){
     $('visit-garden').hidden=!round.finished;
     petals.start();
@@ -153,7 +161,7 @@ function playView(){
   $('sync-status').textContent=round.ticket?'':'Practice round · shared scores are offline.';
 }
 async function startRound(){
-  if(starting || running())return;
+  if(starting || running() || screen==='welcome')return;
   starting=true;
   const button=screen==='garden'?$('replay-button'):$('start-button');
   button.disabled=true;const label=button.textContent;
@@ -211,7 +219,7 @@ function finishRound(){
 function nextBoard(){
   if(running() || starting)return;
   let seed=randomSeed();while(field.tiles.join('')===boardFor(seed).tiles.join(''))seed=(seed+8)>>>0;
-  round=freshRound(seed);field=boardFor(seed);clearPath();persist();useBoardAddress();showScreen('home');$('start-button').focus({preventScroll:true});
+  round=freshRound(seed);field=boardFor(seed);clearPath();persist();useBoardAddress();followAddress();
 }
 function hit(x,y,slop=false){
   const r=board.getBoundingClientRect(), fx=(x-r.left)*SIZE/r.width,fy=(y-r.top)*SIZE/r.height;
@@ -313,7 +321,7 @@ async function showGarden(){
     const earned=current.planted?[]:current.words;
     garden=mod.createGarden({host:$('garden-stage'),seed:current.seed,words:earned,saved,
       onChange:bed=>{write('localStorage',bedKey,bed);if(!current.planted){current.planted=true;persist();}},
-      onPlant:playFlowerNote,phraseTiming:()=>phraseDelays(currentNote()),phraseTime:audio.phraseTime,
+      onPlant:playFlowerNote,phraseTiming:()=>phraseDelays(currentNote()),phraseTime:()=>performance.now(),
       onNotice:msg=>{$('garden-tip').textContent=msg;}});
     garden.setMode(brush);
   }catch{
@@ -335,6 +343,13 @@ async function shareBoard(){
 $('share-button').onclick=shareBoard;
 const leaderboard=connectLeaderboard({getRound:()=>round,share:shareBoard,onRank:showRank});
 const petals=connectPetalWind($('petal-wind'),playFlowerNote);
+const welcome=connectWelcome($('welcome'),()=>{
+  showScreen('home');$('start-button').focus({preventScroll:true});
+},()=>audio.cue('page'));
+$('read-note').onclick=()=>{
+  if(starting || screen!=='home')return;
+  welcome.restart();showScreen('welcome');$('welcome-next').focus({preventScroll:true});
+};
 const petClover=()=>audio.cue('pet');
 const huntPet=$('corgi').cloneNode(true);huntPet.id='hunt-corgi';
 $('hunt-companion').append(huntPet);
@@ -360,13 +375,15 @@ function followAddress(){
   const requested=seedFromLink(new URL(location.href).searchParams.get('board'));
   if(onlineGame && requested!==null && requested!==round.seed){location.reload();return;}
   const wantsGarden=round.finished && location.hash==='#garden';
+  if(location.hash==='#welcome')welcome.restart();
   useBoardAddress(wantsGarden?'#garden':'');
   if(wantsGarden && screen!=='garden'){
     showGarden();leaderboard.refresh();$('result-title').focus({preventScroll:true});
-  }else if(!wantsGarden && screen!=='home'){
+  }else if(!wantsGarden){
     const fromGarden=screen==='garden';
-    showScreen('home');
-    if(fromGarden)$('start-button').focus({preventScroll:true});
+    const next=welcome.finished?'home':'welcome';
+    showScreen(next);
+    if(fromGarden)$(next==='home'?'start-button':'welcome-next').focus({preventScroll:true});
   }
 }
 window.addEventListener('popstate',followAddress);
