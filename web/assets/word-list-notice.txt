@@ -1,0 +1,2 @@
+The game validates words against ENABLE (Enhanced North American Benchmark Lexicon), a public-domain English word-game list. Every valid path on a board is included, with Qu treated as a single tile. The common-word subset is used only to check that boards contain familiar longer words.
+Word list and common-word subset: https://github.com/dolph/dictionary

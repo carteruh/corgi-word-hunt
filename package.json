@@ -1,0 +1,17 @@
+{
+  "name": "corgi-word-hunt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:garden": "esbuild src/garden.mjs --bundle --format=esm --target=es2020 --minify --legal-comments=inline --outfile=web/garden-view.mjs",
+    "build": "npm run build:garden && node tools/build-worker.mjs",
+    "db:generate": "drizzle-kit generate --dialect sqlite --schema ./db/schema.mjs --out ./drizzle",
+    "test": "node --test puzzle.test.mjs garden-music.test.mjs worker/leaderboard.test.mjs"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2",
+    "esbuild": "0.25.12",
+    "three": "0.183.0"
+  }
+}

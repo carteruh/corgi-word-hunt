@@ -1,0 +1,76 @@
+.corgi-puppet {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 94%;
+  animation: breathe 3.8s ease-in-out infinite;
+}
+.corgi .corgi-puppet img {
+  position: absolute;
+  inset: auto;
+  display: block;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  transform: none;
+  animation: none;
+}
+.corgi .corgi-puppet .corgi-body {
+  left: 8%;
+  bottom: 1%;
+  height: 95%;
+  width: auto;
+}
+.corgi .corgi-puppet .corgi-tail {
+  left: 66%;
+  top: 52.5%;
+  width: 33%;
+  transform-origin: 9% 88%;
+  animation: clover-tail-wag .74s ease-in-out infinite alternate;
+}
+.corgi .corgi-puppet .corgi-bone {
+  width: 34%;
+  left: 17.5%;
+  top: 40.8%;
+  transform: rotate(-3deg);
+  transform-origin: 50% 50%;
+}
+.corgi.dragging .corgi-puppet {
+  animation: none;
+  transform: translateY(-4%) rotate(var(--lean, 0deg));
+}
+.corgi.petted .corgi-puppet {
+  animation: hop .45s ease;
+}
+.corgi.playing .corgi-tail {
+  animation-duration: .18s;
+}
+.corgi.playing .corgi-puppet .corgi-body {
+  transform-origin: 48% 96%;
+  animation: clover-catch 1.12s ease-in-out infinite;
+}
+.corgi.playing .corgi-puppet .corgi-bone {
+  animation: clover-bone-toss 1.12s ease-in-out infinite;
+}
+@keyframes clover-tail-wag {
+  from { transform: rotate(-22deg) scaleX(.95); }
+  to { transform: rotate(22deg) scaleX(1.03); }
+}
+@keyframes clover-catch {
+  0%, 12%, 95%, 100% { transform: none; }
+  21% { transform: scale(.995, .965) rotate(-1deg); }
+  45%, 56% { transform: translateY(-2%) rotate(-2.6deg); }
+  80% { transform: scale(1.015, .972) rotate(1.4deg); }
+}
+@keyframes clover-bone-toss {
+  0%, 11% { transform: rotate(-3deg); }
+  21% { transform: translate(1%, 13%) rotate(3deg); }
+  44% { transform: translate(13%, -225%) rotate(145deg); }
+  55% { transform: translate(16%, -253%) rotate(205deg); }
+  77% { transform: translate(2%, -17%) rotate(342deg); }
+  83% { transform: translate(-2%, 8%) rotate(363deg); }
+  95%, 100% { transform: rotate(357deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .corgi.dragging .corgi-puppet { transform: none; }
+}
