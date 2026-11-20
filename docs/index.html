@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="puppet.css">
   <link rel="stylesheet" href="delivery.css">
+  <link rel="stylesheet" href="petal-wind.css">
 </head>
 <body>
   <svg class="symbol-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -41,6 +42,9 @@
 <symbol id="i-paw" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M5 15.6c1.2-2.2 3.6-2.7 4.7-5a2.6 2.6 0 0 1 4.6 0c1.1 2.3 3.5 2.8 4.7 5 1.5 3-1.4 5.2-4.1 4.1-1.7-.7-4.1-.7-5.8 0C6.4 20.8 3.5 18.6 5 15.6Z"/><g fill="currentColor" stroke="none"><ellipse cx="4.3" cy="9.3" rx="2.1" ry="3" transform="rotate(-22 4.3 9.3)"/><ellipse cx="9.4" cy="5.5" rx="2" ry="3"/><ellipse cx="14.6" cy="5.5" rx="2" ry="3"/><ellipse cx="19.7" cy="9.3" rx="2.1" ry="3" transform="rotate(22 19.7 9.3)"/></g></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="m5 15 10-10 4 4L9 19l-5 1zm8-8 4 4"/></symbol>
 <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M3 17C2 8 10 3 20 4c1 11-6 17-14 14m-2 3L16 8"/></symbol>
+<symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h10a3 3 0 1 0-3-3M2 13h16a3 3 0 1 0-2.5-4.6M5 17h7a2.5 2.5 0 1 1-2.1 3.8"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="m11 5-7 7 7 7M4 12h16"/></symbol>
+<symbol id="i-tulip" viewBox="0 0 24 24"><path d="M12 21v-8M7 4l3 2.5L12 3l2 3.5L17 4v4a5 5 0 0 1-10 0zM12 20c-4 0-6-2-7-5 4 0 6 2 7 5Zm0-2c1-3 3-5 7-5-1 3-3 5-7 5Z"/></symbol>
     </defs>
   </svg>
 
@@ -63,7 +67,10 @@
       <div class="garden-heading" id="landing-intro">
         <h1>Corgi<br>Word Hunt</h1>
         <p>Find words in a minute. Grow a meadow with Clover.</p>
-        <button class="button primary" type="button" id="start-button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play for 60 seconds</span></button>
+        <div class="garden-actions">
+          <button class="button primary" type="button" id="start-button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play for 60 seconds</span></button>
+          <button class="button light petal-entry" type="button" data-open-petals aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-wind"/></svg>Petal wind</button>
+        </div>
         <button class="guest-chip" id="guest-button" type="button"><span>Playing as <b id="guest-label"></b></span><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg></button>
       </div>
       <section class="garden-heading result-heading" id="round-result" hidden aria-labelledby="result-title">
@@ -74,6 +81,7 @@
           <button class="button light" id="replay-button" type="button">Replay board</button>
         </div>
         <div class="result-links"><button class="guest-chip" id="watch-delivery" type="button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Replay tulip scene</button>
+        <button class="guest-chip" type="button" data-open-petals aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-wind"/></svg>Petal wind</button>
         <button class="guest-chip" id="new-board" type="button"><svg class="icon" aria-hidden="true"><use href="#i-new"/></svg>Try a new board</button></div>
       </section>
       <div class="garden-tools">
@@ -113,6 +121,23 @@
       </div>
     </section>
   </main>
+  <dialog id="petal-wind" aria-label="Petal wind">
+    <canvas class="wind-field" autofocus tabindex="0" role="group" aria-label="Petal garden" aria-describedby="wind-instruction wind-keys"></canvas>
+    <div class="wind-nav">
+      <button class="wind-button" id="leave-wind" type="button"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg>Garden</button>
+      <button class="wind-button wind-sound" data-sound type="button" aria-label="Flute and game sounds" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg></button>
+    </div>
+    <div class="wind-tools">
+      <div class="wind-shapes" role="group" aria-label="Petal shape">
+        <button class="wind-button" type="button" data-shape="clover" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-paw"/></svg>Clover</button>
+        <button class="wind-button" type="button" data-shape="tulips" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-tulip"/></svg>Tulips</button>
+      </div>
+      <p id="wind-instruction">Drag to scatter petals. Hold to make more.</p>
+      <p id="wind-keys" class="sr-only">Use the arrow keys to move the wind and Space to release petals. Press Escape to return to the garden.</p>
+      <p id="wind-error" hidden role="status"></p>
+    </div>
+    <img id="wind-clover" alt="" hidden data-src="assets/clover.webp">
+  </dialog>
   <dialog id="tulip-film" aria-label="Clover’s tulip delivery" aria-describedby="delivery-description">
     <p class="sr-only" id="delivery-description">Clover looks straight at you and trots down a sunlit path with tulips in her mouth. She nudges the flowers into your view, lets go, and wags her tail. Touch the tulips to play the next flute note.</p>
     <div class="film-screen" tabindex="-1" autofocus>

@@ -1,0 +1,93 @@
+.garden-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.garden-actions .petal-entry { background: #fff9e5e8; }
+.garden-actions .petal-entry .icon { width: 18px; }
+.result-links { flex-wrap: wrap; }
+@media (max-width: 410px) {
+  .garden-actions { gap: 6px; }
+  .garden-actions .button { padding-inline: 12px; gap: 5px; font-size: .85rem; }
+}
+
+#petal-wind {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  overflow: hidden;
+  color: #fff3d5;
+  background: #082638;
+  box-shadow: none;
+  overscroll-behavior: none;
+  color-scheme: dark;
+}
+#petal-wind[open] {
+  background: linear-gradient(0deg, #02151f70, transparent 23%), #082638 url("assets/petal-night.webp") center / cover no-repeat;
+}
+#petal-wind::backdrop { background: #071b26; }
+body:has(#petal-wind[open]) { overflow: hidden; }
+.wind-field { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; outline: none; user-select: none; -webkit-touch-callout: none; }
+.wind-field[data-keyboard]:focus-visible { box-shadow: inset 0 0 0 2px #ffe0a6a8; }
+.wind-nav {
+  position: absolute;
+  inset: max(18px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) auto max(20px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.wind-button {
+  min-height: 44px;
+  border: 1px solid #c6d2b454;
+  border-radius: 30px;
+  background: #102d36e8;
+  color: #f5edd3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 17px;
+  font-size: .88rem;
+  font-weight: 600;
+  pointer-events: auto;
+}
+.wind-button .icon { width: 17px; height: 17px; }
+.wind-sound { width: 44px; padding: 0; }
+.wind-button:focus-visible { outline: 2px solid #ffe3ac; outline-offset: 3px; }
+.wind-tools {
+  position: absolute;
+  bottom: max(19px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 20px);
+  text-align: center;
+  pointer-events: none;
+}
+.wind-shapes {
+  display: inline-flex;
+  align-items: center;
+  background: #0b2530eb;
+  padding: 3px;
+  border: 1px solid #b8caac78;
+  border-radius: 32px;
+  box-shadow: 0 3px 18px #02141c66;
+  pointer-events: auto;
+}
+.wind-shapes .wind-button { min-width: 100px; border: 0; background: transparent; }
+.wind-shapes .wind-button[aria-pressed="true"] { background: #f1dcb0; color: #203531; }
+.wind-tools p:not(.sr-only) { margin: 8px 0 0; font-size: .81rem; font-weight: 500; color: #ffefd3; text-shadow: 0 1px 4px #03151e, 0 0 9px #03151e; }
+@media (hover: hover) {
+  .wind-button:hover { background: #24424a; }
+  .wind-shapes .wind-button[aria-pressed="false"]:hover { background: #284751; }
+}
+@media (max-aspect-ratio: 4/5) { #petal-wind[open] { background-position: center, 80% center; } }
+@media (max-height: 460px) {
+  .wind-nav { top: max(8px, env(safe-area-inset-top)); }
+  .wind-tools { bottom: max(6px, env(safe-area-inset-bottom)); }
+  .wind-tools p:not(.sr-only) { margin-top: 2px; }
+}

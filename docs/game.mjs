@@ -3,6 +3,7 @@ import { SIZE, ROUND_MS, boardFor, seedFromLink, boardLink, freshRound, restoreR
 import {read,write,guest,newId,onlineGame,boardRequest,connectLeaderboard} from './guests.mjs';
 import {placeCorgi} from './corgi.mjs';
 import {createTulipDelivery} from './delivery.mjs';
+import {connectPetalWind} from './petal-wind.mjs';
 import {gardenAudio,melodyLength,phraseDelays} from './garden-audio.mjs';
 
 const $ = id => document.getElementById(id);
@@ -127,7 +128,11 @@ function importGarden(){
   return gardenImport;
 }
 function useBoardAddress(){
-  if(onlineGame) history.replaceState(null,'',boardLink(location.href,round.seed));
+  if(onlineGame){
+    const url=new URL(boardLink(location.href,round.seed));
+    if(!running() && location.hash==='#petals')url.hash='petals';
+    history.replaceState(history.state,'',url);
+  }
 }
 function playView(){
   mounted++;garden?.dispose();garden=null;
@@ -294,9 +299,10 @@ async function showGarden(){
     $('rank-summary').textContent='Checking board scores…';showRank(null);
   }
   setBrush('plant');
+  if($('petal-wind').open)return;
   try{
     const mod=await importGarden();
-    if(id!==mounted || current!==round) return;
+    if(id!==mounted || current!==round || $('petal-wind').open) return;
     const bedKey=gardenKey(current.seed), saved=read('localStorage',bedKey);
     const earned=result && !current.planted?current.words:[];
     garden=mod.createGarden({host:$('garden-stage'),seed:current.seed,words:earned,saved,
@@ -323,6 +329,12 @@ async function shareBoard(){
 $('share-button').onclick=shareBoard;
 const leaderboard=connectLeaderboard({getRound:()=>round,share:shareBoard,onRank:showRank});
 const delivery=createTulipDelivery($('tulip-film'),playFlowerNote);
+const syncPetalWind=connectPetalWind({
+  dialog:$('petal-wind'), available:()=>!starting && !running() && !$('tulip-film').open,
+  onNote:playFlowerNote, onOpen:()=>garden?.stopTrail(),
+  onClose:()=>{if(!garden && !running())showGarden();},
+  returnFocus:()=>round.finished?$('result-scores'):$('start-button'),
+});
 $('watch-delivery').onclick=()=>delivery.play({origin:$('corgi').getBoundingClientRect(),returnFocus:$('watch-delivery')});
 const petClover=()=>audio.cue('pet');
 const huntPet=$('corgi').cloneNode(true);huntPet.id='hunt-corgi';
@@ -348,6 +360,6 @@ paintSound();useBoardAddress();newBoardView();journal();persist();
 if(running()){
   playView();if(clock())ticker=window.setInterval(clock,100);
 }else{
-  paintTime(msLeft(round));showGarden();if(round.finished)leaderboard.refresh();
+  paintTime(msLeft(round));syncPetalWind();showGarden();if(round.finished)leaderboard.refresh();
 }
 window.addEventListener('online',()=>{if(running())pushWords();if(round.finished)leaderboard.refresh();});
