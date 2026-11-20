@@ -1,9 +1,9 @@
-// The fragment can open the experience from a friend's link or the browser's Back/Forward buttons.
-export function connectPetalWind({dialog, available, onNote, onOpen, onClose, returnFocus}) {
-  const canvas=dialog.querySelector('canvas'), hint=dialog.querySelector('#wind-instruction');
-  const status=dialog.querySelector('#wind-error'), shapes=[...dialog.querySelectorAll('[data-shape]')];
+export function connectPetalWind(home, onNote) {
+  const canvas=home.querySelector('canvas'), hint=home.querySelector('#wind-instruction');
+  const portrait=home.querySelector('.wind-portrait'), status=home.querySelector('#wind-error');
+  const shapes=[...home.querySelectorAll('[data-shape]')];
   const pointerHint=hint.textContent;
-  let resources, field, visit=0, chosen='clover', opener, owner=null, keyDown=false, keyPoint;
+  let resources, field, visit=0, chosen='clover', owner=null, keyDown=false, keyPoint;
   let noteX=0, noteY=0, lastNote=0;
 
   function select(name) {
@@ -18,38 +18,35 @@ export function connectPetalWind({dialog, available, onNote, onOpen, onClose, re
     field?.release();
   }
   function size() {
-    const box=canvas.getBoundingClientRect();
-    if (!field || !box.width || !box.height) return;
-    field.resize(box.width,box.height);
-    keyPoint={x:box.width*.5,y:box.height*.475};
+    if (!field || home.hidden) return;
+    const box=canvas.getBoundingClientRect(), area=portrait.getBoundingClientRect();
+    if (!area.width || !area.height) return;
+    keyPoint={x:area.left-box.left+area.width/2,y:area.top-box.top+area.height/2};
+    field.resize(box.width,box.height,keyPoint.x,keyPoint.y,Math.min(area.width,area.height*.94,570));
   }
   const observer=new ResizeObserver(size);
-  async function open() {
-    if (dialog.open || !available()) return;
+  async function start() {
     const current=++visit;
-    onOpen();
-    dialog.showModal();
-    canvas.focus({preventScroll:true});
     canvas.setAttribute('aria-busy','true');
     status.hidden=true; hint.textContent=pointerHint;
     const slow=setTimeout(()=>{
-      if (dialog.open && !field) { status.textContent='Gathering petals…'; status.hidden=false; }
+      if (current===visit && !field) { status.textContent='Gathering petals…'; status.hidden=false; }
     },450);
     try {
       resources??=Promise.all([import('./petal-portraits.mjs'),import('./petal-field.mjs')])
         .then(async ([art,physics])=>{
           const compact=matchMedia('(pointer: coarse)').matches || innerWidth<650;
-          const portraits=await art.makePortraits(dialog.querySelector('#wind-clover'),document.querySelector('[data-frame="pov-tulips"]'),compact?3700:6500);
+          const portraits=await art.makePortraits(home.querySelector('#wind-clover'),home.querySelector('#wind-tulips'),compact?3700:6500);
           return {portraits,create:physics.createPetalField};
         }).catch(error=>{resources=null; throw error;});
       const {portraits,create}=await resources;
-      if (!dialog.open || current!==visit) return;
+      if (current!==visit) return;
       field=create(canvas,portraits,matchMedia('(prefers-reduced-motion: reduce)').matches);
       size(); select(chosen);
-      observer.observe(canvas); status.hidden=true;
+      observer.observe(canvas); observer.observe(portrait); status.hidden=true;
     } catch {
-      if (dialog.open && current===visit) {
-        status.textContent='The petals couldn’t load. Reopen Petal wind to try again.';
+      if (current===visit) {
+        status.textContent='Reload to try the petals again. You can still play the hunt.';
         status.hidden=false;
       }
     } finally {
@@ -57,34 +54,10 @@ export function connectPetalWind({dialog, available, onNote, onOpen, onClose, re
       if (current===visit) canvas.setAttribute('aria-busy','false');
     }
   }
-  function cleanUp() {
+  function stop() {
     visit++; release(); observer.disconnect(); field?.dispose(); field=null;
-    onClose();
-    const target=opener?.getClientRects().length?opener:returnFocus();
-    target?.focus({preventScroll:true}); opener=null;
+    canvas.width=canvas.height=1;
   }
-  function sync() {
-    if (location.hash==='#petals' && available()) open();
-    else if (dialog.open) { dialog.close(); cleanUp(); }
-  }
-  function leave() {
-    if (history.state?.petalWind) history.back();
-    else {
-      const url=new URL(location.href); url.hash='';
-      history.replaceState(history.state,'',url);
-      sync();
-    }
-  }
-  for (const button of document.querySelectorAll('[data-open-petals]')) button.addEventListener('click',()=>{
-    if (!available()) return;
-    opener=button;
-    if (location.hash!=='#petals') history.pushState({...history.state,petalWind:true},'','#petals');
-    sync();
-  });
-  window.addEventListener('popstate',sync);
-  window.addEventListener('hashchange',sync);
-  dialog.querySelector('#leave-wind').addEventListener('click',leave);
-  dialog.addEventListener('cancel',e=>{e.preventDefault(); leave();});
   for (const button of shapes) button.addEventListener('click',()=>select(button.dataset.shape));
 
   function note(x,y) {
@@ -135,5 +108,5 @@ export function connectPetalWind({dialog, available, onNote, onOpen, onClose, re
     if (document.hidden) release();
     field?.setActive(!document.hidden);
   });
-  return sync;
+  return {start,stop};
 }

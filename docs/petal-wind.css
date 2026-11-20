@@ -1,93 +1,79 @@
-.garden-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.garden-actions .petal-entry { background: #fff9e5e8; }
-.garden-actions .petal-entry .icon { width: 18px; }
-.result-links { flex-wrap: wrap; }
-@media (max-width: 410px) {
-  .garden-actions { gap: 6px; }
-  .garden-actions .button { padding-inline: 12px; gap: 5px; font-size: .85rem; }
-}
-
 #petal-wind {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  padding: 0;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template: "intro portrait" minmax(0, 1fr) "intro tools" auto / minmax(0, .85fr) minmax(0, 1.15fr);
+  min-height: 33rem;
+  height: 100vh;
+  height: 100svh;
+  padding: max(77px, env(safe-area-inset-top)) max(6vw, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(7vw, env(safe-area-inset-left));
   overflow: hidden;
-  color: #fff3d5;
-  background: #082638;
-  box-shadow: none;
-  overscroll-behavior: none;
+  background: linear-gradient(0deg, #02151f64, transparent 23%), #082638 url("assets/petal-night.webp") center / cover no-repeat;
+  color: #fff3d9;
   color-scheme: dark;
 }
-#petal-wind[open] {
-  background: linear-gradient(0deg, #02151f70, transparent 23%), #082638 url("assets/petal-night.webp") center / cover no-repeat;
-}
-#petal-wind::backdrop { background: #071b26; }
-body:has(#petal-wind[open]) { overflow: hidden; }
-.wind-field { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; outline: none; user-select: none; -webkit-touch-callout: none; }
+.wind-field { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; outline: none; user-select: none; -webkit-touch-callout: none; }
 .wind-field[data-keyboard]:focus-visible { box-shadow: inset 0 0 0 2px #ffe0a6a8; }
-.wind-nav {
-  position: absolute;
-  inset: max(18px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) auto max(20px, env(safe-area-inset-left));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.wind-button {
-  min-height: 44px;
-  border: 1px solid #c6d2b454;
-  border-radius: 30px;
-  background: #102d36e8;
-  color: #f5edd3;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 17px;
-  font-size: .88rem;
-  font-weight: 600;
-  pointer-events: auto;
-}
+.wind-intro, .wind-portrait, .wind-tools { position: relative; z-index: 1; min-width: 0; pointer-events: none; }
+.wind-intro { grid-area: intro; align-self: center; padding-bottom: 4vh; }
+.wind-intro h1 { margin-left: -.047em; color: #fff2d4; font-size: clamp(3.5rem, min(7.9vw, 13.6vh), 8rem); line-height: .9; letter-spacing: -.062em; }
+.wind-intro h1 span { display: block; }
+.wind-intro > p { max-width: 29ch; margin: 21px 0 24px; color: #e6e7d7; font-size: clamp(1rem, 1.48vw, 1.22rem); line-height: 1.5; text-wrap: pretty; }
+.home-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.wind-intro button, .wind-intro a, .wind-shapes { pointer-events: auto; }
+#start-button { padding-inline: 23px; min-height: 48px; background: #f6deb1; border: 1px solid #ffe8be; color: #223831; box-shadow: 0 2px 0 #503f2e66; }
+#start-button .icon { width: 15px; height: 15px; }
+#visit-garden { color: #ffeaca; font-size: .92rem; font-weight: 650; text-underline-offset: .25em; }
+.wind-intro .guest-chip { margin: 8px 0 0; min-height: 36px; padding: 5px 7px; color: #e4e9da; background: #0a2639a8; font-size: .85rem; }
+.wind-portrait { grid-area: portrait; min-height: 0; }
+.wind-tools { grid-area: tools; align-self: end; padding-top: 7px; text-align: center; }
+.wind-tools p:not(.sr-only) { margin: 8px 0 0; font-size: .87rem; font-weight: 500; color: #fff0d6; text-shadow: 0 1px 4px #03151e, 0 0 9px #03151e; }
+.wind-shapes { display: inline-flex; align-items: center; padding: 3px; border: 1px solid #b8caac78; border-radius: 32px; background: #0b2530eb; box-shadow: 0 3px 18px #02141c66; }
+.wind-button { display: inline-flex; align-items: center; justify-content: center; min-width: 98px; min-height: 43px; gap: 8px; padding: 0 15px; border: 0; border-radius: 30px; background: transparent; color: #f5edd3; font-weight: 600; font-size: .88rem; }
 .wind-button .icon { width: 17px; height: 17px; }
-.wind-sound { width: 44px; padding: 0; }
-.wind-button:focus-visible { outline: 2px solid #ffe3ac; outline-offset: 3px; }
-.wind-tools {
-  position: absolute;
-  bottom: max(19px, env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: calc(100% - 20px);
-  text-align: center;
-  pointer-events: none;
-}
-.wind-shapes {
-  display: inline-flex;
-  align-items: center;
-  background: #0b2530eb;
-  padding: 3px;
-  border: 1px solid #b8caac78;
-  border-radius: 32px;
-  box-shadow: 0 3px 18px #02141c66;
-  pointer-events: auto;
-}
-.wind-shapes .wind-button { min-width: 100px; border: 0; background: transparent; }
-.wind-shapes .wind-button[aria-pressed="true"] { background: #f1dcb0; color: #203531; }
-.wind-tools p:not(.sr-only) { margin: 8px 0 0; font-size: .81rem; font-weight: 500; color: #ffefd3; text-shadow: 0 1px 4px #03151e, 0 0 9px #03151e; }
+.wind-button[aria-pressed="true"] { background: #f1dcb0; color: #203531; }
+.home-sound { display: none; }
+body[data-screen="home"] .home-sound { display: inline-flex; }
+body[data-screen="home"] .nav-button { background: #102d36e8; color: #f5edd3; border-color: #c6d2b454; }
+#petal-wind :is(button, a):focus-visible, body[data-screen="home"] .nav-button:focus-visible { outline: 2px solid #ffe3ac; outline-offset: 3px; }
+.result-links { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 11px; }
+.result-links a { color: inherit; text-decoration: none; pointer-events: auto; }
 @media (hover: hover) {
-  .wind-button:hover { background: #24424a; }
-  .wind-shapes .wind-button[aria-pressed="false"]:hover { background: #284751; }
+  #start-button:hover { background: #ffeac2; }
+  body[data-screen="home"] .nav-button:hover, .wind-button[aria-pressed="false"]:hover { background: #284751; }
+  .result-links a:hover { text-decoration: underline; }
 }
-@media (max-aspect-ratio: 4/5) { #petal-wind[open] { background-position: center, 80% center; } }
-@media (max-height: 460px) {
-  .wind-nav { top: max(8px, env(safe-area-inset-top)); }
-  .wind-tools { bottom: max(6px, env(safe-area-inset-bottom)); }
+@media (max-width: 700px) and (orientation: portrait), (max-width: 520px) {
+  #petal-wind {
+    grid-template: "intro" auto "portrait" minmax(0, 1fr) "tools" auto / minmax(0, 1fr);
+    padding: max(76px, calc(env(safe-area-inset-top) + 58px)) max(13px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(13px, env(safe-area-inset-left));
+    background-position: center, 80% center;
+  }
+  .wind-intro { text-align: center; padding: 0; }
+  .wind-intro h1 { margin: 0; font-size: clamp(2.7rem, 10vw, 4.2rem); line-height: .97; }
+  .wind-intro h1 span { display: inline; }
+  .wind-intro > p { margin: 10px auto 13px; max-width: 31ch; font-size: 1rem; line-height: 1.35; }
+  .home-actions { justify-content: center; gap: 10px; }
+  .wind-intro .guest-chip { margin: 3px auto 0; }
+  .wind-tools p:not(.sr-only) { margin-top: 5px; }
+}
+@media (max-width: 520px) and (max-height: 650px) {
+  #petal-wind { padding-top: max(65px, calc(env(safe-area-inset-top) + 53px)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .wind-intro > p { margin: 7px auto 10px; }
+  #start-button { min-height: 44px; }
+}
+@media (max-width: 360px) {
+  .wind-intro h1 { font-size: clamp(2.1rem, 11.4vw, 2.55rem); }
+}
+@media (max-width: 500px) {
+  body[data-screen="home"] .nav-button { min-width: 44px; min-height: 44px; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  #petal-wind { min-height: 19rem; padding-top: max(56px, calc(env(safe-area-inset-top) + 45px)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .wind-intro { padding-bottom: 0; }
+  .wind-intro h1 { font-size: clamp(2.8rem, 12vh, 4rem); }
+  .wind-intro > p { margin: 10px 0; font-size: .94rem; line-height: 1.3; }
+  .wind-intro .guest-chip { margin-top: 2px; }
+  .wind-tools { padding-top: 2px; }
   .wind-tools p:not(.sr-only) { margin-top: 2px; }
 }

@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#dbe8bf">
-  <meta name="description" content="Meet Clover in a storybook flower garden. Play a one-minute word hunt and challenge friends on the same board under a nickname.">
+  <meta name="theme-color" content="#092536">
+  <meta name="description" content="Scatter petals with Clover, trace words for one minute, and grow flowers in your garden. Share the board with friends and compare scores.">
   <title>Corgi Word Hunt</title>
   <link rel="canonical" href="https://carteruh.github.io/corgi-word-hunt/">
   <meta property="og:title" content="Corgi Word Hunt">
-  <meta property="og:description" content="A minute of word hunting with Clover the corgi. Share a board and see whose score blooms highest.">
-  <meta property="og:image" content="https://carteruh.github.io/corgi-word-hunt/assets/garden-postcard.webp">
+  <meta property="og:description" content="Meet Clover in a meadow of petals. Find words in one minute, then visit the garden they grew.">
+  <meta property="og:image" content="https://carteruh.github.io/corgi-word-hunt/assets/petal-postcard.webp">
+  <meta property="og:image:alt" content="Clover the corgi made of golden petals in a moonlit meadow">
   <link rel="icon" href="assets/flower.svg" type="image/svg+xml">
-  <link rel="preload" as="image" href="assets/meadow.webp">
+  <link rel="preload" as="image" href="assets/petal-night.webp">
   <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="puppet.css">
-  <link rel="stylesheet" href="delivery.css">
   <link rel="stylesheet" href="petal-wind.css">
 </head>
-<body>
+<body data-screen="home">
   <svg class="symbol-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
       <symbol id="i-spark" viewBox="0 0 16 16"><path fill="currentColor" stroke="none" d="M7 0h2v4h2v2h2v1h3v2h-3v1h-2v2H9v4H7v-4H5v-2H3V9H0V7h3V6h2V4h2z"/></symbol>
@@ -50,13 +50,38 @@
 
   <header class="topbar">
     <nav class="nav-controls" aria-label="Game controls">
+      <button class="nav-button icon-only home-sound" data-sound type="button" aria-label="Flute and game sounds" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg></button>
       <button id="scores-button" class="nav-button" type="button" aria-label="Board scores"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg><span>Board scores</span></button>
       <button id="share-button" class="nav-button" type="button" aria-label="Share this board"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg><span>Share board</span></button>
       <button id="help-button" class="nav-button icon-only" type="button" aria-label="How to play" title="How to play"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
     </nav>
   </header>
   <main>
-    <section id="garden-home" class="garden-home" aria-label="Clover’s flower garden">
+    <section id="petal-wind" aria-labelledby="home-title">
+      <div class="wind-intro" id="landing-intro">
+        <h1 id="home-title">Corgi <span>Word Hunt</span></h1>
+        <p>Trace words in one minute. Each word grows a flower in your garden.</p>
+        <div class="home-actions">
+          <button class="button" type="button" id="start-button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play for 60 seconds</span></button>
+          <a id="visit-garden" href="#garden" hidden>Your garden</a>
+        </div>
+        <button class="guest-chip" id="guest-button" type="button"><span>Playing as <b id="guest-label"></b></span><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg></button>
+      </div>
+      <canvas class="wind-field" tabindex="0" role="group" aria-label="Interactive petal meadow" aria-describedby="wind-instruction wind-keys"></canvas>
+      <div class="wind-portrait" aria-hidden="true"></div>
+      <div class="wind-tools">
+        <div class="wind-shapes" role="group" aria-label="Petal shape">
+          <button class="wind-button" type="button" data-shape="clover" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-paw"/></svg>Clover</button>
+          <button class="wind-button" type="button" data-shape="tulips" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-tulip"/></svg>Tulips</button>
+        </div>
+        <p id="wind-instruction">Drag to scatter petals. Hold to make more.</p>
+        <p id="wind-keys" class="sr-only">Use the arrow keys to move the wind and Space to release petals.</p>
+        <p id="wind-error" hidden role="status"></p>
+      </div>
+      <img id="wind-clover" alt="" hidden data-src="assets/clover.webp">
+      <img id="wind-tulips" alt="" hidden data-src="assets/pov-tulips.webp">
+    </section>
+    <section id="garden-home" class="garden-home" hidden aria-label="Clover’s flower garden">
       <div class="garden-stage" id="garden-stage" tabindex="0" role="group" aria-label="Flower meadow. Tap to play one note of Merry-Go-Round of Life, or drag to plant a whole phrase. With the keyboard, press Enter for one flower or Shift plus Enter for a phrase. Use two fingers or right-drag to turn."></div>
       <button id="corgi" class="corgi" type="button" aria-label="Clover the corgi. Drag to move, or use the arrow keys." aria-describedby="corgi-help">
         <span class="corgi-shadow"></span>
@@ -64,25 +89,17 @@
         <span class="corgi-tag" aria-hidden="true">Drag Clover</span>
       </button>
       <span id="corgi-help" class="sr-only">Press an arrow key to move Clover. Hold Shift for a larger step.</span>
-      <div class="garden-heading" id="landing-intro">
-        <h1>Corgi<br>Word Hunt</h1>
-        <p>Find words in a minute. Grow a meadow with Clover.</p>
-        <div class="garden-actions">
-          <button class="button primary" type="button" id="start-button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play for 60 seconds</span></button>
-          <button class="button light petal-entry" type="button" data-open-petals aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-wind"/></svg>Petal wind</button>
-        </div>
-        <button class="guest-chip" id="guest-button" type="button"><span>Playing as <b id="guest-label"></b></span><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg></button>
-      </div>
-      <section class="garden-heading result-heading" id="round-result" hidden aria-labelledby="result-title">
+      <section class="garden-heading result-heading" id="round-result" aria-labelledby="result-title">
         <p class="overline">Time’s up</p><h1 id="result-title" tabindex="-1">Your garden grew!</h1>
         <p id="win-message"></p><p id="rank-summary" role="status"></p>
         <div class="result-actions">
           <button class="button primary" id="result-scores" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg>Board scores</button>
           <button class="button light" id="replay-button" type="button">Replay board</button>
         </div>
-        <div class="result-links"><button class="guest-chip" id="watch-delivery" type="button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Replay tulip scene</button>
-        <button class="guest-chip" type="button" data-open-petals aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-wind"/></svg>Petal wind</button>
-        <button class="guest-chip" id="new-board" type="button"><svg class="icon" aria-hidden="true"><use href="#i-new"/></svg>Try a new board</button></div>
+        <div class="result-links">
+          <a class="guest-chip" id="back-home" href="#petals"><svg class="icon" aria-hidden="true"><use href="#i-wind"/></svg>Petal home</a>
+          <button class="guest-chip" id="new-board" type="button"><svg class="icon" aria-hidden="true"><use href="#i-new"/></svg>Try a new board</button>
+        </div>
       </section>
       <div class="garden-tools">
         <div class="tool-dock" role="group" aria-label="Garden tools">
@@ -121,41 +138,6 @@
       </div>
     </section>
   </main>
-  <dialog id="petal-wind" aria-label="Petal wind">
-    <canvas class="wind-field" autofocus tabindex="0" role="group" aria-label="Petal garden" aria-describedby="wind-instruction wind-keys"></canvas>
-    <div class="wind-nav">
-      <button class="wind-button" id="leave-wind" type="button"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg>Garden</button>
-      <button class="wind-button wind-sound" data-sound type="button" aria-label="Flute and game sounds" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg></button>
-    </div>
-    <div class="wind-tools">
-      <div class="wind-shapes" role="group" aria-label="Petal shape">
-        <button class="wind-button" type="button" data-shape="clover" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-paw"/></svg>Clover</button>
-        <button class="wind-button" type="button" data-shape="tulips" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-tulip"/></svg>Tulips</button>
-      </div>
-      <p id="wind-instruction">Drag to scatter petals. Hold to make more.</p>
-      <p id="wind-keys" class="sr-only">Use the arrow keys to move the wind and Space to release petals. Press Escape to return to the garden.</p>
-      <p id="wind-error" hidden role="status"></p>
-    </div>
-    <img id="wind-clover" alt="" hidden data-src="assets/clover.webp">
-  </dialog>
-  <dialog id="tulip-film" aria-label="Clover’s tulip delivery" aria-describedby="delivery-description">
-    <p class="sr-only" id="delivery-description">Clover looks straight at you and trots down a sunlit path with tulips in her mouth. She nudges the flowers into your view, lets go, and wags her tail. Touch the tulips to play the next flute note.</p>
-    <div class="film-screen" tabindex="-1" autofocus>
-      <canvas class="film-canvas" aria-hidden="true"></canvas>
-      <button class="film-flowers" type="button" aria-label="Play a flute note with the tulips" hidden></button>
-      <button type="button" id="leave-film" class="film-skip" aria-label="Skip to results"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M5.5 5.3c0-.85.9-1.28 1.57-.8l8.08 6.67c.53.4.53 1.25 0 1.65l-8.08 6.67c-.67.47-1.57.02-1.57-.82z"/><rect x="17" y="4.5" width="2.2" height="15" rx="1.1"/></svg></button>
-    </div>
-    <div hidden aria-hidden="true" id="film-art">
-      <img alt="" data-frame="pov-meadow" data-src="assets/pov-meadow.webp">
-      <img alt="" data-frame="pov-tulips" data-src="assets/pov-tulips.webp">
-      <img alt="" data-frame="pov-clover-head" data-src="assets/pov-clover-head.webp">
-      <img alt="" data-frame="pov-clover-eye-left" data-src="assets/pov-clover-eye-left.webp">
-      <img alt="" data-frame="pov-clover-eye-right" data-src="assets/pov-clover-eye-right.webp">
-      <img alt="" data-frame="pov-clover-chest" data-src="assets/pov-clover-chest.webp">
-      <img alt="" data-frame="pov-clover-paw" data-src="assets/pov-clover-paw.webp">
-      <img alt="" data-frame="pov-clover-tail" data-src="assets/pov-clover-tail.webp">
-    </div>
-  </dialog>
   <dialog id="scores-dialog" class="dialog" aria-labelledby="scores-title"><div class="dialog-inner">
     <button class="close-button" type="button" data-dismiss aria-label="Close board scores"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
     <p class="overline">Shared board <span data-board-code></span></p><h2 id="scores-title">Board scores</h2>
@@ -170,7 +152,7 @@
     <ul class="instructions"><li>Trace three or more letters, then lift to submit. You can also tap tiles and press Submit.</li><li>Letters can touch at the sides or corners. Use a tile once per word. A Qu tile counts as two letters.</li><li>Each word grows a flower. Share the board link to compare your best scores with friends.</li></ul>
     <table class="score-key"><caption>Points per word</caption><thead><tr><th>Letters</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8+</th></tr></thead><tbody><tr><th>Points</th><td>100</td><td>400</td><td>800</td><td>1400</td><td>1800</td><td>2200</td></tr></tbody></table>
     <p class="help-keys">On a keyboard, move with the arrows, add with Space, undo with Backspace and submit with Enter. The clock keeps running if you leave the board.</p>
-    <p class="help-keys">In the garden, plant one flower per note of Joe Hisaishi’s <cite>Merry-Go-Round of Life</cite>. Drag a trail or press Shift + Enter to play a phrase. Use two fingers to turn and zoom, or right-drag and scroll with a mouse.</p>
+    <p class="help-keys">After the hunt, plant one flower per note of Joe Hisaishi’s <cite>Merry-Go-Round of Life</cite>. Drag a trail or press Shift + Enter to play a phrase. Use two fingers to turn and zoom, or right-drag and scroll with a mouse.</p>
     <button class="button primary" type="button" data-dismiss>Got it</button>
   </div></dialog>
   <dialog id="share-dialog" class="dialog" aria-labelledby="share-title"><div class="dialog-inner">

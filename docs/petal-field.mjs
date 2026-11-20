@@ -31,15 +31,12 @@ export function createPetalField(canvas, portraits, reduced) {
     awakeUntil=Math.max(awakeUntil,performance.now()+seconds*1000);
     if (active && !frame && !document.hidden) frame=requestAnimationFrame(draw);
   }
-  function resize(w,h) {
-    if (!w || !h || (width===w && height===h)) return;
-    width=w; height=h;
+  function resize(w,h,cx,cy,size) {
+    if (width===w && height===h && midX===cx && midY===cy && span===size) return;
+    width=w; height=h; midX=cx; midY=cy; span=size;
     const dpr=Math.min(1.5,window.devicePixelRatio||1);
     canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
     ctx.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
-    span=Math.min(w*.93,h*.65,560);
-    // Leave space for the controls in short landscape windows.
-    midX=w*.5; midY=h<460?h*.46:h*.475;
     raster=petalRaster(ctx,sheet,canvas.width,canvas.height,dpr);
     for (let i=0;i<count;i++) {
       const p=particles[i], target=portraits[shape][i];

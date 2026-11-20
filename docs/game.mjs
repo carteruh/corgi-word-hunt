@@ -2,7 +2,6 @@ import { SIZE, ROUND_MS, boardFor, seedFromLink, boardLink, freshRound, restoreR
 
 import {read,write,guest,newId,onlineGame,boardRequest,connectLeaderboard} from './guests.mjs';
 import {placeCorgi} from './corgi.mjs';
-import {createTulipDelivery} from './delivery.mjs';
 import {connectPetalWind} from './petal-wind.mjs';
 import {gardenAudio,melodyLength,phraseDelays} from './garden-audio.mjs';
 
@@ -17,7 +16,7 @@ let field = boardFor(round.seed), tiles = [], path = [], gesture = null, focusCe
 let ticker = 0, secondsShown = -1, sound = read('localStorage',soundKey) !== false;
 const audio=gardenAudio(sound);
 let best = Math.max(0,Number(read('localStorage',bestKey))||0);
-let gardenImport;
+let gardenImport, screen;
 const total = () => round.words.reduce((sum,word)=>sum+points(word),0);
 const persist = () => write('sessionStorage',roundKey,round);
 const running = () => round.startedAt!==null && !round.finished;
@@ -127,23 +126,36 @@ function importGarden(){
   gardenImport ??= import('./garden-view.mjs').catch(error=>{gardenImport=null;throw error;});
   return gardenImport;
 }
-function useBoardAddress(){
-  if(onlineGame){
-    const url=new URL(boardLink(location.href,round.seed));
-    if(!running() && location.hash==='#petals')url.hash='petals';
-    history.replaceState(history.state,'',url);
+function useBoardAddress(hash='',push=false){
+  const url=new URL(onlineGame?boardLink(location.href,round.seed):location.href);
+  url.hash=hash;
+  if(url.href!==location.href) {
+    if(push)history.pushState(null,'',url);
+    else history.replaceState(null,'',url);
   }
 }
+function showScreen(next){
+  if(screen===next)return;
+  if(screen==='home')petals.stop();
+  if(screen==='garden'){garden?.dispose();garden=null;}
+  screen=next;document.body.dataset.screen=next;
+  document.body.classList.toggle('in-game',next==='hunt');
+  $('petal-wind').hidden=next!=='home';$('game-shell').hidden=next!=='hunt';$('garden-home').hidden=next!=='garden';
+  if(next==='home'){
+    $('visit-garden').hidden=!round.finished;
+    petals.start();
+  }
+  window.scrollTo(0,0);
+}
 function playView(){
-  mounted++;garden?.dispose();garden=null;
-  $('garden-home').hidden=true;$('game-shell').hidden=false;document.body.classList.add('in-game');
-  delivery.warm();window.scrollTo(0,0);newBoardView();journal();paintTime(msLeft(round));
+  showScreen('hunt');newBoardView();journal();paintTime(msLeft(round));
+  importGarden().catch(()=>{}); // Have the planting tools ready when the minute ends.
   $('sync-status').textContent=round.ticket?'':'Practice round · shared scores are offline.';
 }
 async function startRound(){
   if(starting || running())return;
   starting=true;
-  const button=round.finished?$('replay-button'):$('start-button');
+  const button=screen==='garden'?$('replay-button'):$('start-button');
   button.disabled=true;const label=button.textContent;
   const labelNode=button.querySelector('span'); if(labelNode)labelNode.textContent='Opening board…';
   const fresh=freshRound(round.seed);
@@ -158,7 +170,7 @@ async function startRound(){
     }catch{ /* An offline player still gets a full practice round. */ }
   }
   round=fresh;round.startedAt=Date.now()-elapsed;round.syncedWords=0;
-  field=boardFor(round.seed);secondsShown=-1;persist();playView();setFocus(0);
+  field=boardFor(round.seed);secondsShown=-1;persist();useBoardAddress();playView();setFocus(0);
   feedback('Trace a word and lift, or tap tiles and submit.');
   ticker=window.setInterval(clock,100);audio.cue('start');
   button.disabled=false;if(labelNode)labelNode.textContent=label.trim();
@@ -186,7 +198,7 @@ function finishRound(){
   write('localStorage',bestKey,best);persist();journal();
   for(const d of document.querySelectorAll('dialog[open]')) d.close();
   audio.cue('end');
-  delivery.play({origin:$('hunt-corgi').getBoundingClientRect(),onCover:()=>{showGarden();leaderboard.refresh();},returnFocus:$('result-title')});
+  useBoardAddress('#garden',true);showGarden();$('result-title').focus({preventScroll:true});
   const current=round;
   (async()=>{
     await pushWords();
@@ -199,7 +211,7 @@ function finishRound(){
 function nextBoard(){
   if(running() || starting)return;
   let seed=randomSeed();while(field.tiles.join('')===boardFor(seed).tiles.join(''))seed=(seed+8)>>>0;
-  round=freshRound(seed);field=boardFor(seed);clearPath();persist();useBoardAddress();showGarden();$('start-button').focus({preventScroll:true});
+  round=freshRound(seed);field=boardFor(seed);clearPath();persist();useBoardAddress();showScreen('home');$('start-button').focus({preventScroll:true});
 }
 function hit(x,y,slop=false){
   const r=board.getBoundingClientRect(), fx=(x-r.left)*SIZE/r.width,fy=(y-r.top)*SIZE/r.height;
@@ -288,25 +300,19 @@ function showRank(me){
   $('rank-summary').textContent=message;
 }
 async function showGarden(){
-  const result=round.finished, current=round, id=++mounted;
-  garden?.dispose();garden=null;
-  $('game-shell').hidden=true;$('garden-home').hidden=false;document.body.classList.remove('in-game');
-  $('landing-intro').hidden=result;$('round-result').hidden=!result;window.scrollTo(0,0);
-  if(result){
-    const count=round.words.length;
-    $('result-title').textContent=count?'Your garden grew!':'Time for another hunt?';
-    $('win-message').textContent=count+' '+(count===1?'word':'words')+' · '+total().toLocaleString()+' points'+(count?' · '+count+(count===1?' new flower':' new flowers'):'');
-    $('rank-summary').textContent='Checking board scores…';showRank(null);
-  }
+  const current=round, id=++mounted, count=current.words.length;
+  showScreen('garden');
+  $('result-title').textContent=count?'Your garden grew!':'Welcome to your garden';
+  $('win-message').textContent=count+' '+(count===1?'word':'words')+' · '+total().toLocaleString()+' points'+(count?' · '+count+(count===1?' new flower':' new flowers'):'');
+  $('rank-summary').textContent='Checking board scores…';showRank(null);
   setBrush('plant');
-  if($('petal-wind').open)return;
   try{
     const mod=await importGarden();
-    if(id!==mounted || current!==round || $('petal-wind').open) return;
+    if(id!==mounted || current!==round || screen!=='garden') return;
     const bedKey=gardenKey(current.seed), saved=read('localStorage',bedKey);
-    const earned=result && !current.planted?current.words:[];
+    const earned=current.planted?[]:current.words;
     garden=mod.createGarden({host:$('garden-stage'),seed:current.seed,words:earned,saved,
-      onChange:bed=>{write('localStorage',bedKey,bed);if(result && !current.planted){current.planted=true;persist();}},
+      onChange:bed=>{write('localStorage',bedKey,bed);if(!current.planted){current.planted=true;persist();}},
       onPlant:playFlowerNote,phraseTiming:()=>phraseDelays(currentNote()),phraseTime:audio.phraseTime,
       onNotice:msg=>{$('garden-tip').textContent=msg;}});
     garden.setMode(brush);
@@ -328,14 +334,7 @@ async function shareBoard(){
 }
 $('share-button').onclick=shareBoard;
 const leaderboard=connectLeaderboard({getRound:()=>round,share:shareBoard,onRank:showRank});
-const delivery=createTulipDelivery($('tulip-film'),playFlowerNote);
-const syncPetalWind=connectPetalWind({
-  dialog:$('petal-wind'), available:()=>!starting && !running() && !$('tulip-film').open,
-  onNote:playFlowerNote, onOpen:()=>garden?.stopTrail(),
-  onClose:()=>{if(!garden && !running())showGarden();},
-  returnFocus:()=>round.finished?$('result-scores'):$('start-button'),
-});
-$('watch-delivery').onclick=()=>delivery.play({origin:$('corgi').getBoundingClientRect(),returnFocus:$('watch-delivery')});
+const petals=connectPetalWind($('petal-wind'),playFlowerNote);
 const petClover=()=>audio.cue('pet');
 const huntPet=$('corgi').cloneNode(true);huntPet.id='hunt-corgi';
 $('hunt-companion').append(huntPet);
@@ -356,10 +355,26 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{
   }
 }));
 
-paintSound();useBoardAddress();newBoardView();journal();persist();
+function followAddress(){
+  if(running() || starting){useBoardAddress();return;}
+  const requested=seedFromLink(new URL(location.href).searchParams.get('board'));
+  if(onlineGame && requested!==null && requested!==round.seed){location.reload();return;}
+  const wantsGarden=round.finished && location.hash==='#garden';
+  useBoardAddress(wantsGarden?'#garden':'');
+  if(wantsGarden && screen!=='garden'){
+    showGarden();leaderboard.refresh();$('result-title').focus({preventScroll:true});
+  }else if(!wantsGarden && screen!=='home'){
+    const fromGarden=screen==='garden';
+    showScreen('home');
+    if(fromGarden)$('start-button').focus({preventScroll:true});
+  }
+}
+window.addEventListener('popstate',followAddress);
+window.addEventListener('hashchange',followAddress);
+paintSound();newBoardView();journal();persist();
 if(running()){
-  playView();if(clock())ticker=window.setInterval(clock,100);
+  useBoardAddress();playView();if(clock())ticker=window.setInterval(clock,100);
 }else{
-  paintTime(msLeft(round));syncPetalWind();showGarden();if(round.finished)leaderboard.refresh();
+  paintTime(msLeft(round));followAddress();
 }
 window.addEventListener('online',()=>{if(running())pushWords();if(round.finished)leaderboard.refresh();});
