@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { FIELDS } from './web/boards.mjs';
-import { SIZE, boardFor, stepPath, spell, judge, points, seedFromLink, boardLink, freshRound, restoreRound, msLeft } from './web/puzzle.mjs';
+import { FIELDS } from './docs/boards.mjs';
+import { SIZE, boardFor, stepPath, spell, judge, points, seedFromLink, boardLink, freshRound, restoreRound, msLeft } from './docs/puzzle.mjs';
 
 function reachable(tiles, word, cell, prefix='', used=0){
   if(used&(1<<cell))return false;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {melodyLength,phraseDelays} from './web/garden-audio.mjs';
+import {melodyLength,phraseDelays} from './docs/garden-audio.mjs';
 
 test('a fresh stroke plays a phrase in waltz time, and a mid-phrase stroke continues from the next note',()=>{
   const opening=phraseDelays(0),answer=phraseDelays(opening.length);

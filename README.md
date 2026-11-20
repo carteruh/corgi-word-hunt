@@ -1,6 +1,6 @@
 # Corgi Word Hunt
 
-[Play in your browser](https://carteruh.github.io/corgi-word-hunt/)
+[GitHub Pages](https://carteruh.github.io/corgi-word-hunt/) · [Play on the original site](https://moonpetal-moonlit-word-hunt.smoky-dune-6060.chatgpt.site/)
 
 Trace adjacent letters to find as many words as you can in one minute. Share a board link and compare your best scores with friends under a nickname. Players can join from a phone or a computer without an account.
 
@@ -8,6 +8,6 @@ In the meadow, tap to plant a flower and play the next flute note of Joe Hisaish
 
 ## Development
 
-With Node.js 24 installed, run `npm ci`, `npm test`, and `npm run build`. The browser game lives in `web`. The editable 3D garden sources live in `src`. Changes pushed to `main` rebuild the garden and publish `web` to GitHub Pages.
+With Node.js 24 installed, run `npm ci`, `npm test`, and `npm run build`. The browser game lives in `docs`. The editable 3D garden sources live in `src`. After editing the 3D garden, include the rebuilt `docs/garden-view.mjs` in your commit. GitHub Pages serves `docs` from `main`.
 
 Board scores are shared with the original game through its hosted leaderboard API. The server implementation lives in `worker`, and the database schema and migrations live in `db` and `drizzle`.

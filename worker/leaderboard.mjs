@@ -1,4 +1,4 @@
-import { boardFor, points, ROUND_MS, seedFromLink } from '../web/puzzle.mjs';
+import { boardFor, points, ROUND_MS, seedFromLink } from '../docs/puzzle.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const finalDeliveryMs = 2200;

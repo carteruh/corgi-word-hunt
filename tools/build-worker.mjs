@@ -7,15 +7,16 @@ const mime = {'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charse
 const assets = {};
 async function visit(dir) {
   for (const entry of await readdir(dir,{withFileTypes:true})) {
+    if (entry.name === '.nojekyll') continue;
     const path = join(dir,entry.name);
     if (entry.isDirectory()) { await visit(path); continue; }
     const ext = extname(path), type = mime[ext];
     if (!type) throw new Error('Missing content type for '+path);
     const binary = ['.webp','.woff2'].includes(ext);
-    assets['/'+relative('web',path)] = [type,binary?'base64':'text',await readFile(path,binary?'base64':'utf8')];
+    assets['/'+relative('docs',path)] = [type,binary?'base64':'text',await readFile(path,binary?'base64':'utf8')];
   }
 }
-await visit('web');
+await visit('docs');
 await build({entryPoints:['worker/index.mjs'], outfile:'dist/server/index.js',bundle:true,format:'esm',target:'es2022',minify:true,
   plugins:[{name:'web-assets',setup(builder){
     builder.onResolve({filter:/^site:assets$/},()=>({path:'assets',namespace:'web'}));

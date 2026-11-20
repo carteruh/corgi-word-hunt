@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {serveScores} from './leaderboard.mjs';
 import {localDb} from '../tools/local-db.mjs';
-import {boardFor,points} from '../web/puzzle.mjs';
+import {boardFor,points} from '../docs/puzzle.mjs';
 
 test('the GitHub Pages game can preflight and play on the same scoreboard',async()=>{
   const db=localDb(),origin='https://carteruh.github.io',url='https://garden.example/api/boards/1dh1/';

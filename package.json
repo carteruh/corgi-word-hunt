@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:garden": "esbuild src/garden.mjs --bundle --format=esm --target=es2020 --minify --legal-comments=inline --outfile=web/garden-view.mjs",
+    "build:garden": "esbuild src/garden.mjs --bundle --format=esm --target=es2020 --minify --legal-comments=inline --outfile=docs/garden-view.mjs",
     "build": "npm run build:garden && node tools/build-worker.mjs",
     "db:generate": "drizzle-kit generate --dialect sqlite --schema ./db/schema.mjs --out ./drizzle",
     "test": "node --test puzzle.test.mjs garden-music.test.mjs worker/leaderboard.test.mjs"
